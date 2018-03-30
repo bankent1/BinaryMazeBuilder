@@ -28,7 +28,7 @@ public class BinaryMazeBuilderMain {
 		//System.out.println(x);
 		
 		// TODO: build blank maze
-		int size = 5;
+		int size = 10;
 		Graph maze = buildBlankMaze(size);
 		System.out.println("Area = " + maze.size());
 		//System.out.println(maze.getNode(24).getNeighbors().size());
@@ -112,21 +112,29 @@ public class BinaryMazeBuilderMain {
 		curr.mark();
 		stack.add(curr);
 		
-		while (!stack.isEmpty()) {
-			ArrayList<Node> validNeigh = getValidNeigh(curr, size);
-			if (!validNeigh.isEmpty()) {
-				//ArrayList<Node> validChoices = validNeigh;
-				// randNum 
-				int r = rand.nextInt(validNeigh.size());
-				Node randNode = validNeigh.get(r);
-				randNode.mark();
-				stack.add(randNode);
-				// mazeArr[randNode.getLoc()[0]][randNode.getLoc()[1]] = '1';
-				int[] loc = randNode.getLoc();
-				mazeArr[loc[0]][loc[1]] = '1';
+		//while (curr.getLoc()[0] != size-1) {
+		while (!stack.isEmpty() && curr.getLoc()[0] != size-1) {
+			for (Node neigh : curr.getNeighbors()) {		
+				ArrayList<Node> validNeigh = getValidNeigh(curr, size);
+				if (!validNeigh.isEmpty()) {
+					//ArrayList<Node> validChoices = validNeigh;
+					// randNum 
+					int r = rand.nextInt(validNeigh.size());
+					Node randNode = validNeigh.get(r);
+					randNode.mark();
+					//curr = randNode;
+					stack.add(randNode);
+					// mazeArr[randNode.getLoc()[0]][randNode.getLoc()[1]] = '1';
+					int[] loc = randNode.getLoc();
+					mazeArr[loc[0]][loc[1]] = '1';
+					//System.out.println("------");
+	//				printMaze(mazeArr);
+	//				System.out.println("------");
+				}
 			}
 			curr = stack.get(stack.size()-1);
 			stack.remove(stack.size()-1);
+			//stack.remove(0);
 		}
 		
 		return mazeArr;
@@ -135,15 +143,25 @@ public class BinaryMazeBuilderMain {
 	public static ArrayList<Node> getValidNeigh(Node node, int size) {
 		ArrayList<Node> validNodes = new ArrayList<Node>();
 		for (Node n : node.getNeighbors()) {
-			if (!n.checkMarked() && node.getLoc()[0] == (size-1) 
-					&& n.getNeighbors().size() == 3) {
+			if (!n.checkMarked() && n.getLoc()[0] == (size-1) 
+					&& n.getNeighbors().size() == 3 && validMove(n)) {
 				validNodes.add(n);
 			}
-			else if (!n.checkMarked() && n.getNeighbors().size() == 4) {
+			else if (!n.checkMarked() && n.getNeighbors().size() == 4 && validMove(n)) {
 				validNodes.add(n);
 			}
 		}
 		return validNodes;
+	}
+	
+	public static boolean validMove(Node n) {
+		int marks = 0;
+		for (Node neigh : n.getNeighbors()) {
+			if (neigh.checkMarked()) {
+				marks++;
+			}
+		}
+		return marks <= 1;
 	}
 	
 }
