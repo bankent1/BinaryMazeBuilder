@@ -27,6 +27,7 @@ public class BinaryMazeBuilderMain {
 		
 		System.out.print("Enter size of square maze: ");
 		size = in.nextInt();
+		in.close();
 		
 		//size = 10;
 		int area = size*size;
