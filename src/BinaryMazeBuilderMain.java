@@ -28,7 +28,7 @@ public class BinaryMazeBuilderMain {
 		//System.out.println(x);
 		
 		// TODO: build blank maze
-		int size = 7;
+		int size = 100;
 		Graph maze = buildBlankMaze(size);
 		System.out.println("Area = " + maze.size());
 		//System.out.println(maze.getNode(24).getNeighbors().size());
@@ -41,11 +41,35 @@ public class BinaryMazeBuilderMain {
 		
 		//char[][] mazeArr = initCharArr(size);
 		//mazeArr = recBuildPaths(maze, start, size, mazeArr, false);
-		char[][] mazeArr = buildPaths(maze, start, size);
-		//char[][] mazeArr = bfsBuildPaths(maze, start, size);
+		//char[][] mazeArr = buildPaths(maze, start, size);
+		char[][] mazeArr = bfsBuildPaths(maze, start, size);
 		
 		printMaze(mazeArr);
 		
+		mazeArr = fixEnd(mazeArr, size);
+		
+		printMaze(mazeArr);
+		
+	}
+	
+	public static char[][] fixEnd(char[][] mazeArr, int size) {
+		ArrayList<Integer> ends = new ArrayList<Integer>();
+		for (int i = 0; i < size; i++) {
+			if (mazeArr[size-2][i] == '1') {
+				System.out.println("i = " + i);
+				ends.add(i);
+			}
+		}
+		Random rand = new Random();
+		int r = rand.nextInt(ends.size());
+		
+		for (int i = 0; i < size; i++) {
+			if (i == ends.get(r)) {
+				mazeArr[size-1][i] = '1';
+			}
+			
+		}
+		return mazeArr;
 	}
 	
 	public static char[][] initCharArr(int size) {
@@ -77,6 +101,9 @@ public class BinaryMazeBuilderMain {
 			for (int j = 0; j < size; j++) {
 				//maze[i][j] = '0';
 				Node node = new Node(i, j);
+				if (i == size-1) {
+					continue;
+				}
 				if (j == 0) {
 					rowNeighbor = -1;
 				}
@@ -156,30 +183,27 @@ public class BinaryMazeBuilderMain {
 		curr.mark();
 		queue.add(curr);
 		
-		while (!queue.isEmpty() && curr.getLoc()[0] != size-1) {
+		while (!queue.isEmpty()) {
 			curr = queue.get(0);
-			queue.addAll(curr.getNeighbors());
+			//queue.addAll(curr.getNeighbors());
 			//mazeArr[curr.getLoc()[0]][curr.getLoc()[1]] = '1';
 			ArrayList<Node> validNeigh = getValidNeigh(curr, size);
-			if (!validNeigh.isEmpty()) {
-				//curr.mark();
-				//mazeArr[curr.getLoc()[0]][curr.getLoc()[1]] = '1';
-				//ArrayList<Node> validChoices = validNeigh;
-				// randNum 
-				//for (int i = 0; i < validNeigh.size(); i++) {
-					int r = rand.nextInt(validNeigh.size());
-					Node randNode = validNeigh.get(r);
-					randNode.mark();
-					//curr = randNode;
-					//stack.add(randNode);
-					// mazeArr[randNode.getLoc()[0]][randNode.getLoc()[1]] = '1';
-					int[] loc = randNode.getLoc();
-					mazeArr[loc[0]][loc[1]] = '1';
-				//}
-				//System.out.println("------");
+			ArrayList<Node> subVN = new ArrayList<Node>();
+			//subVN.addAll(curr.getNeighbors());
+			for (int i = 0; i < validNeigh.size(); i++) {
+				int rn = rand.nextInt(validNeigh.size());
+				queue.add(validNeigh.get(rn));	
+				subVN.add(validNeigh.get(rn));
+			}
+			
+			for (Node n : subVN) {
+				n.mark();
+				int[] loc = n.getLoc();
+				mazeArr[loc[0]][loc[1]] = '1';
 //				printMaze(mazeArr);
 //				System.out.println("------");
 			}
+			//curr.mark();
 			queue.remove(0);
 		}
 		
@@ -189,13 +213,12 @@ public class BinaryMazeBuilderMain {
 	
 	public static char[][] recBuildPaths(Graph maze, Node curr, int size, char[][] mazeArr, boolean found) {
 		mazeArr[curr.getLoc()[0]][curr.getLoc()[1]] = '1';
-		if (!found) {
-			if (curr.getLoc()[0] == size-1) {
-				found = true;
-				//return mazeArr;	
-	
-				return mazeArr;
-			}
+
+		if (curr.getLoc()[0] == size-1) {
+			found = true;
+			//return mazeArr;	
+
+			return mazeArr;
 		}
 		
 		ArrayList<Node> validNeigh = getValidNeigh(curr, size);
@@ -203,9 +226,11 @@ public class BinaryMazeBuilderMain {
 			Random rand = new Random();
 			int r = rand.nextInt(validNeigh.size());
 			Node randNode = validNeigh.get(r);
-			randNode.mark();
-			int[] loc = randNode.getLoc();
-			mazeArr[loc[0]][loc[1]] = '1';
+			if (getValidNeigh(curr, size).contains(randNode)) {
+				randNode.mark();
+				int[] loc = randNode.getLoc();
+				mazeArr[loc[0]][loc[1]] = '1';
+			}
 			printMaze(mazeArr);
 			System.out.println("------");
 			mazeArr = recBuildPaths(maze, randNode, size, mazeArr, found);
@@ -217,10 +242,11 @@ public class BinaryMazeBuilderMain {
 		return mazeArr;
 	}
 	
+	
 	public static ArrayList<Node> getValidNeigh(Node node, int size) {
 		ArrayList<Node> validNodes = new ArrayList<Node>();
 		for (Node n : node.getNeighbors()) {
-			if (!n.checkMarked() && n.getLoc()[0] == (size-1) 
+			if (!n.checkMarked() && n.getLoc()[0] == (size-2) 
 					&& n.getNeighbors().size() == 3 && validMove(n)) {
 				validNodes.add(n);
 			}
