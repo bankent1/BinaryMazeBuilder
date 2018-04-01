@@ -40,6 +40,8 @@ public class BinaryMazeBuilderMain {
 		int r = rand.nextInt(size-2) + 1;
 		Node start = maze.getNode(r);
 		char[][] mazeArr = bfsBuildPaths(maze, start, size);
+		//char[][] mazeArr = recBacktrack(maze, start, size);
+		//printMaze(mazeArr);
 		mazeArr = fixEnd(mazeArr, size);
 
 		// prints out maze to outfile
@@ -189,12 +191,51 @@ public class BinaryMazeBuilderMain {
 				n.mark();
 				int[] loc = n.getLoc();
 				mazeArr[loc[0]][loc[1]] = '1';
-//				printMaze(mazeArr);
-//				System.out.println("------");
+				//printMaze(mazeArr);
+				//System.out.println("------");
 			}
 			queue.remove(0);
 		}
 		return mazeArr;
+	}
+	
+	public static char[][] recBacktrack(Graph maze, Node curr, int size) {
+		ArrayList<Node> stack = new ArrayList<Node>();
+		char[][] mazeArr = initCharArr(size);
+		Random rand = new Random();
+		
+		mazeArr[curr.getLoc()[0]][curr.getLoc()[1]] = '1';
+		curr.mark();
+		
+		while(!stack.isEmpty()) {
+			ArrayList<Node> unvisitedNeigh = getUnvisitedNeigh(curr);
+			if (!unvisitedNeigh.isEmpty()) {
+				int r = rand.nextInt(unvisitedNeigh.size());
+				Node randNode = unvisitedNeigh.get(r);
+				stack.add(0, randNode);
+				int[] loc = randNode.getLoc();
+				mazeArr[loc[0]][loc[1]] = '1';
+				curr = randNode;
+				curr.mark();
+			}
+			else {
+				curr = stack.get(stack.size()-1);
+				stack.remove(stack.size()-1);
+			}
+		}
+		
+		return mazeArr;
+		
+	}
+	
+	public static ArrayList<Node> getUnvisitedNeigh(Node node) {
+		ArrayList<Node> unvisitedNeigh = new ArrayList<Node>();
+		for (Node n : node.getNeighbors()) {
+			if (!n.checkMarked()) {
+				unvisitedNeigh.add(n);
+			}
+		}
+		return unvisitedNeigh;
 	}
 	
 	/*
