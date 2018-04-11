@@ -34,7 +34,7 @@ public class BinaryMazeBuilderMain {
 //		in.close();
 		
 		// TODO: build blank maze
-		size = 10;
+		size = 50;
 
 		//size = 10;
 		int area = size*size;
@@ -287,6 +287,7 @@ public class BinaryMazeBuilderMain {
 					// undo path if one already on last row
 					randNode.unmark();
 					mazeArr[loc[0]][loc[1]] = '0';
+					continue;
 				}
 				
 				//System.out.println("Printing path at [" + loc[0] + "][" + loc[1] + "]");
