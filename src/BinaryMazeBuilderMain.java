@@ -7,7 +7,8 @@
  * Notes on Program: This program will randomly generate an nxn maze where the
  * size n is defined by the user input. The maze being generated is a binary
  * representation of a maze with 0's being walls and 1's being paths. The maze
- * generated only has one solution.
+ * generated only has one solution. A depth first search backtracking algorithm
+ * is used for the generation of the maze.
  * 
  * 
  */
@@ -16,6 +17,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Queue;
 import java.util.Random;
 import java.util.Stack;
 import java.util.Scanner;
@@ -23,6 +25,8 @@ import java.util.Scanner;
 public class BinaryMazeBuilderMain {
 	
 	private static boolean foundEnd = false;
+	private static final int SEED = 10;
+	private static int recDepth = 0;
 	
 	public static void main(String[] args){
 		System.out.println("Let's generate a maze!");
@@ -34,7 +38,7 @@ public class BinaryMazeBuilderMain {
 //		in.close();
 		
 		// TODO: build blank maze
-		size = 50;
+		size = 20;
 
 		//size = 10;
 		int area = size*size;
@@ -50,11 +54,11 @@ public class BinaryMazeBuilderMain {
 		char[][] mazeArr = initCharArr(size);
 		int[] loc = start.getLoc();
 		mazeArr[loc[0]][loc[1]] = '1';
-		//mazeArr = recBuildPaths(maze, start, size, mazeArr, false);
-		mazeArr = recBuildPaths2(maze, start, size, mazeArr);
-		//mazeArr = recBackTrackBuild(maze, start, size, mazeArr);
-		//char[][] mazeArr = buildPaths(maze, start, size);
-		//char[][] mazeArr = bfsBuildPaths(maze, start, size);
+		mazeArr = dfsBuildPaths(maze, start, size, mazeArr);
+
+		//mazeArr = recBuildPaths2(maze, start, size, mazeArr);
+
+
 		
 		//printMaze(mazeArr);
 		
@@ -117,6 +121,16 @@ public class BinaryMazeBuilderMain {
 		}
 		
 		return arr;
+	}
+	
+	public static void debugPrintMaze(char[][] mazeArr){
+		// iterates through mazeArr and prints out all char values
+		for (int i = 0; i < mazeArr.length; i++) {
+			for (int j = 0; j < mazeArr[0].length; j++) {
+				System.out.print(mazeArr[i][j]);
+			}
+			System.out.println();
+		}
 	}
 	
 	public static void printMaze(char[][] mazeArr){
@@ -228,34 +242,46 @@ public class BinaryMazeBuilderMain {
 		return mazeArr;
 	}
 
-	public static char[][] recBackTrackBuild(Graph maze, Node curr, int size, char[][]mazeArr) {
+	public static char[][] dfsBuildPaths(Graph maze, Node curr, int size, char[][]mazeArr) {
 		
-		Stack<Node> nodesLeft = new Stack<Node>();
+		ArrayList<Node> nodesLeft = new ArrayList<Node>();
+		//Stack<Node> nodesLeft = new Stack<Node>();
 		curr.mark();
 		int[] loc = curr.getLoc();
 		mazeArr[loc[0]][loc[1]] = '1';
-		nodesLeft.push(curr);
-		
+		//nodesLeft.push(curr);
+		nodesLeft.add(curr);
+	
 		while (!nodesLeft.isEmpty()) {
-				ArrayList<Node> validNeigh = getValidNeigh(curr, size);
-				if (!validNeigh.isEmpty()) {
-					// choose random neighbor node
-					Random rand = new Random();
-					int r = rand.nextInt(validNeigh.size());
-					Node randNode = validNeigh.get(r);
-					nodesLeft.push(randNode);
-					
-					// make this node a path
-					randNode.mark();
-					loc = randNode.getLoc();
-					mazeArr[loc[0]][loc[1]] = '1';
-					curr = randNode;
-					printMaze(mazeArr);
-					System.out.println("------");
+			curr = nodesLeft.get(0);
+			nodesLeft.remove(0);
+			ArrayList<Node> validNeigh = getValidNeigh(curr, size);
+			Collections.shuffle(validNeigh);
+			for (Node randNode : validNeigh) {
+				randNode.mark();
+				loc = randNode.getLoc();
+				mazeArr[loc[0]][loc[1]] = '1';
+				
+				if (loc[0] == size-1 && !foundEnd) {
+					foundEnd = true;
+					//mazeArr[currLoc[0]][currLoc[1]] = '1';
 				}
-				else {
-					curr = nodesLeft.pop();
+				else if (loc[0] == size-1 && foundEnd) {
+					// undo path if one already on last row
+					randNode.unmark();
+					mazeArr[loc[0]][loc[1]] = '0';
+					continue;
 				}
+				
+				//nodesLeft.push(randNode);
+				//nodesLeft.addAll(getValidNeigh(randNode, size));
+				nodesLeft.add(randNode);
+				
+			}
+			
+			//curr = nodesLeft.pop();
+			
+			
 		}
 		
 		return mazeArr;
@@ -265,10 +291,10 @@ public class BinaryMazeBuilderMain {
 	public static char[][]recBuildPaths2(Graph maze, Node curr, int size, char[][]mazeArr) {
 		ArrayList<Node> validNeigh = getValidNeigh(curr, size);
 		int[] currLoc = curr.getLoc();
-		//System.out.println("Num Valid Neighbors for loc[" + debugLoc[0] + "][" + debugLoc[1] + "]: " + validNeigh.size());
+		//System.out.println("Num Valid Neighbors for loc[" + currLoc[0] + "][" + currLoc[1] + "]: " + validNeigh.size());
 		if (validNeigh.size() == 0 || currLoc[0] == size-1) {
 			if (currLoc[0] == size-1 && !foundEnd) {
-				System.out.println("\nFirst end found at loc[" + currLoc[0] + "][" + currLoc[1] + "]");
+				//System.out.println("\nFirst end found at loc[" + currLoc[0] + "][" + currLoc[1] + "]");
 				foundEnd = true;
 				//mazeArr[currLoc[0]][currLoc[1]] = '1';
 			}
@@ -282,6 +308,7 @@ public class BinaryMazeBuilderMain {
 				randNode.mark();
 				int[] loc = randNode.getLoc();
 				mazeArr[loc[0]][loc[1]] = '1';
+				//mazeArr[loc[0]][loc[1]] = '*';
 				if (loc[0] == size-1 && foundEnd) {
 					//System.out.println("Found end found at loc[" + loc[0] + "][" + loc[1] + "]");
 					// undo path if one already on last row
@@ -289,12 +316,16 @@ public class BinaryMazeBuilderMain {
 					mazeArr[loc[0]][loc[1]] = '0';
 					continue;
 				}
-				
+				//System.out.println("Neighbor was at loc[" + currLoc[0] + "][" + currLoc[1] + "]");
 				//System.out.println("Printing path at [" + loc[0] + "][" + loc[1] + "]");
+				//debugPrintMaze(mazeArr);
+				//System.out.println("------");
+				//mazeArr[loc[0]][loc[1]] = '1';
+				System.out.println("Depth: " + recDepth++);
+				mazeArr =  recBuildPaths2(maze, randNode, size, mazeArr);
 			}
-			//printMaze(mazeArr);
-			//System.out.println("------");
-			mazeArr =  recBuildPaths2(maze, randNode, size, mazeArr);
+
+			
 		}
 		return mazeArr;
 	}
