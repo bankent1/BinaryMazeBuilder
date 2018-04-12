@@ -38,7 +38,7 @@ public class BinaryMazeBuilderMain {
 //		in.close();
 		
 		// TODO: build blank maze
-		size = 20;
+		size = 50;
 
 		//size = 10;
 		int area = size*size;
@@ -54,7 +54,8 @@ public class BinaryMazeBuilderMain {
 		char[][] mazeArr = initCharArr(size);
 		int[] loc = start.getLoc();
 		mazeArr[loc[0]][loc[1]] = '1';
-		mazeArr = dfsBuildPaths(maze, start, size, mazeArr);
+		//mazeArr = dfsBuildPaths(maze, start, size, mazeArr);
+		mazeArr = dfsBuildPaths2(maze, start, size, mazeArr);
 
 		//mazeArr = recBuildPaths2(maze, start, size, mazeArr);
 
@@ -279,6 +280,60 @@ public class BinaryMazeBuilderMain {
 				
 			}
 			
+			//curr = nodesLeft.pop();
+			
+			
+		}
+		
+		return mazeArr;
+		
+	}
+	
+	public static char[][] dfsBuildPaths2(Graph maze, Node curr, int size, char[][]mazeArr) {
+		
+		//ArrayList<Node> nodesLeft = new ArrayList<Node>();
+		Stack<Node> nodesLeft = new Stack<Node>();
+		curr.mark();
+		int[] loc = curr.getLoc();
+		mazeArr[loc[0]][loc[1]] = '1';
+		nodesLeft.push(curr);
+		//nodesLeft.add(curr);
+	
+		while (!nodesLeft.isEmpty()) {
+			Node prev = curr;
+			curr = nodesLeft.pop();
+			if (getValidNeigh(prev, size).contains(curr) || curr.equals(prev)) {
+				curr.mark();
+				loc = curr.getLoc();
+				mazeArr[loc[0]][loc[1]] = '1';
+				if (loc[0] == size-1 && !foundEnd) {
+					foundEnd = true;
+					//mazeArr[currLoc[0]][currLoc[1]] = '1';
+				}
+				else if (loc[0] == size-1 && foundEnd) {
+					// undo path if one already on last row
+					curr.unmark();
+					mazeArr[loc[0]][loc[1]] = '0';
+					continue;
+				}
+				ArrayList<Node> validNeigh = getValidNeigh(curr, size);
+				Collections.shuffle(validNeigh);
+				for (Node randNode : validNeigh) {
+					nodesLeft.push(randNode);
+					//nodesLeft.addAll(getValidNeigh(randNode, size));
+					//nodesLeft.add(randNode);
+				}
+
+			}
+//			if (getValidNeigh(prev, size).contains(curr) || curr.equals(prev)) {
+//				ArrayList<Node> validNeigh = getValidNeigh(curr, size);
+//				Collections.shuffle(validNeigh);
+//				for (Node randNode : validNeigh) {
+//					nodesLeft.push(randNode);
+//					//nodesLeft.addAll(getValidNeigh(randNode, size));
+//					//nodesLeft.add(randNode);
+//				}
+//			}
 			//curr = nodesLeft.pop();
 			
 			
