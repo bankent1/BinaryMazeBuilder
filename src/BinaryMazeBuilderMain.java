@@ -301,6 +301,8 @@ public class BinaryMazeBuilderMain {
 	
 		while (!nodesLeft.isEmpty()) {
 			Node prev = curr;
+			//curr = nodesLeft.get(nodesLeft.size() - 1);
+			//nodesLeft.remove(nodesLeft.size() - 1);
 			curr = nodesLeft.pop();
 			if (getValidNeigh(prev, size).contains(curr) || curr.equals(prev)) {
 				curr.mark();
@@ -320,7 +322,6 @@ public class BinaryMazeBuilderMain {
 				Collections.shuffle(validNeigh);
 				for (Node randNode : validNeigh) {
 					nodesLeft.push(randNode);
-					//nodesLeft.addAll(getValidNeigh(randNode, size));
 					//nodesLeft.add(randNode);
 				}
 
