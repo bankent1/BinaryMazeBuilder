@@ -33,12 +33,12 @@ public class BinaryMazeBuilderMain {
 		Scanner in = new Scanner(System.in);
 		int size = 0;
 		
-//		System.out.print("Enter size of square maze: ");
-//		size = in.nextInt();
-//		in.close();
+		System.out.print("Enter size of square maze: ");
+		size = in.nextInt();
+		in.close();
 		
 		// TODO: build blank maze
-		size = 50;
+		//size = 100;
 
 		//size = 10;
 		int area = size*size;
@@ -55,9 +55,9 @@ public class BinaryMazeBuilderMain {
 		int[] loc = start.getLoc();
 		mazeArr[loc[0]][loc[1]] = '1';
 		//mazeArr = dfsBuildPaths(maze, start, size, mazeArr);
-		mazeArr = dfsBuildPaths2(maze, start, size, mazeArr);
+		//mazeArr = dfsBuildPaths2(maze, start, size, mazeArr);
 
-		//mazeArr = recBuildPaths2(maze, start, size, mazeArr);
+		mazeArr = recBuildPaths2(maze, start, size, mazeArr);
 
 
 		
@@ -377,7 +377,7 @@ public class BinaryMazeBuilderMain {
 				//debugPrintMaze(mazeArr);
 				//System.out.println("------");
 				//mazeArr[loc[0]][loc[1]] = '1';
-				System.out.println("Depth: " + recDepth++);
+				//System.out.println("Depth: " + recDepth++);
 				mazeArr =  recBuildPaths2(maze, randNode, size, mazeArr);
 			}
 
